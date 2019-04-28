@@ -1,4 +1,5 @@
 import tkinter
+from functools import reduce
 
 class Aplication:
     def __init__ (self, master = None):
@@ -202,37 +203,72 @@ class Aplication:
         self.display.delete(0 , len(self.display.get()))
     def calcular(self, event):
         numero = self.display.get()
-        operacoes = ("+", "-", "*", "/")
+        operacoes = {
+        "+" : lambda x, y: x + y,
+        "-" : lambda x, y: x - y,
+        "/" : lambda x, y: x / y,
+        "*" : lambda x, y: x * y
+        }
         numeros = []
+        ind = []
         temp = ""
-        for i in numero:
-            if(i in operacoes):
-                numeros.append(float(temp))
-                temp = ""
-            else:
-                temp += i
-        numeros.append(float(temp))
-        result = numeros[0]
-        indiceNumero = 0
-        for i in numero:
-            if(i in operacoes):
-                if(i == '+'):
-                    result += numeros[indiceNumero + 1]
-                if(i == '-'):
-                    result -= numeros[indiceNumero + 1]
-                if(i == '*'):
-                    result *= numeros[indiceNumero + 1]           
-                if(i == '/'):
-                    try:
-                        result /= numeros[indiceNumero + 1]
-                    except ZeroDivisionError as err:
-                        self.display.delete(0 , len(self.display.get()))
-                        self.display.insert(0, "undefined")
-                        print(err)
-                        exit
-                indiceNumero += 1
+
+        try:
+            for i in numero:
+                if(i in operacoes):
+                    numeros.append(float(temp))
+                    ind.append(i)
+                    temp = ""
+                else:
+                    temp += i
+            numeros.append(float(temp))
+        except:
+            self.display.delete(0 , len(self.display.get()))
+            self.display.insert(0, "Erro de sintaxe")
+        
+        result = 0
+        for i in range(0, len(ind)):
+            if i < len(ind) and ind[i] == "*":
+                result = operacoes[ind[i]](numeros[i], numeros[i + 1])
+                numeros.remove(numeros[i])
+                numeros.insert(i, result)
+                numeros.remove(numeros[i+1])
+                ind.remove(ind[i])
+        
+        for i in range(0, len(ind)):
+            if i < len(ind) and ind[i] == "/":
+                try: 
+                    result = operacoes[ind[i]](numeros[i], numeros[i + 1])
+                    numeros.remove(numeros[i])
+                    numeros.insert(i, result)
+                    numeros.remove(numeros[i+1])
+                    ind.remove(ind[i])
+                except ZeroDivisionError as err:
+                    self.display.delete(0 , len(self.display.get()))
+                    self.display.insert(0, "Erro divisão por 0")
+                    print(err)
+
+        for i in range(0, len(ind)):
+            if i < len(ind) and ind[i] == "+": 
+                result = operacoes[ind[i]](numeros[i], numeros[i + 1])
+                numeros.remove(numeros[i])
+                numeros.insert(i, result)
+                numeros.remove(numeros[i+1])
+                ind.remove(ind[i])
+        
+        for i in range(0, len(ind)):
+            if i < len(ind) and ind[i] == "-":
+                result = operacoes[ind[i]](numeros[i], numeros[i + 1])
+                numeros.remove(numeros[i])
+                numeros.insert(i, result)
+                numeros.remove(numeros[i+1])
+                ind.remove(ind[i])
+        
+        print(ind)
+        print(numeros)
+        
         self.display.delete(0 , len(self.display.get()))
-        self.display.insert(0, str(result))
+        self.display.insert(0, str(numeros[0]))
 
         
 root = tkinter.Tk()
